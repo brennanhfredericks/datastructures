@@ -36,7 +36,7 @@ class LIFO_Deque_Stack:
     def __str__(self):
         return self._stack.__str__()
 
-#FIFO -> First In First Out
+#FIFO -> First In First Out -> Thread safe
 class FIFO_Deque_Stack:
 
     def __init__(self,stack=list(),max_size=5):
@@ -72,7 +72,6 @@ class FIFO_Deque_Stack:
     
     def __str__(self):
         return self._stack.__str__()
-
 
 #LIFO -> Last In First Out
 class LIFO_List_Stack:
