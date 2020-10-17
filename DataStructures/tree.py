@@ -15,6 +15,7 @@ class Node:
     def __str__(self):
         return f"{self.value}"
 
+
 class BinarySearchTree:
     def __init__(self):
         self.root = None
