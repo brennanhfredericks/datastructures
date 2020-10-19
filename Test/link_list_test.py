@@ -74,6 +74,16 @@ def test_cicular_link_list():
     cll.add_node_at_index('A',index=0)
     cll.add_node_at_index('F')
     cll.add_node_at_index('@',index=1)
+    cll.add_node_at_index('!',index=-3)
+
+    assert cll.get_node_at_index(0).value == 'A'
+    assert cll.get_node_at_index(-1).value == 'F'
+    assert cll.get_node_at_index(-3).value == '!'
+    assert cll.get_node_at_index(1).value == '@'
+    assert cll.get_node_at_index(3).value == 'C'
+
+    cll.remove_node_at_index(1)
+    cll.remove_node_at_index(-3)
 
     # cll.add_node_at_index('C',2)
     # cll.add_node_at_index('D',3)

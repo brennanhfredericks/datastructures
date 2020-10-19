@@ -47,6 +47,21 @@ class Circular_Linked_List:
         if self._head is None:
             return 
         
+        position = self._get_position(index)
+        
+        if position == 0:
+            return self._head
+
+        if index < 0:
+            position -=1
+       
+
+        this_node = self._head
+        i = itertools.count()
+        while (idx := next(i)) != position: #stop at previous node
+            this_node = this_node.next_node
+
+        return this_node
 
     def add_node_at_index(self,data,index=-1): #defualt add at end
         
@@ -76,6 +91,8 @@ class Circular_Linked_List:
             self._current_node = self._head
             self._count += 1
             return True
+
+        
 
         elif position == self._count: # insert at the end
             if self._count < 2:
@@ -123,11 +140,44 @@ class Circular_Linked_List:
             self._count +=1
             return True
         
-
     def remove_node_at_index(self,index):
         
         if self._head is None:
             return 
+
+        position = self._get_position(index)
+       
+        if index < 0:
+            position -=1
+
+        if position == 0:
+
+            new_head = self._head.next_node
+            end_node = self._head.prev_node
+
+            new_head.prev_node = end_node
+            end_node.next_node = new_head
+
+            self._head = new_head
+            self._current_node = self._head
+            self._count -=1
+        else:
+
+            this_node = self._head
+            i = itertools.count()
+            while (idx := next(i)) != position: #stop at previous node
+                this_node = this_node.next_node
+
+            prv_node = this_node.prev_node
+            nxt_node = this_node.next_node
+
+            prv_node.next_node = nxt_node
+            nxt_node.prev_node = prv_node
+
+            del this_node
+            self._count -=1
+
+        
 
     def next_node(self):
         self._current_node = self._current_node.next_node
