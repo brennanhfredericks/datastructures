@@ -83,6 +83,7 @@ def test_cicular_link_list():
     assert cll.get_node_at_index(3).value == 'C'
 
     cll.remove_node_at_index(1)
+    assert cll.get_node_at_index(1).value == 'B'
     cll.remove_node_at_index(-3)
 
     # cll.add_node_at_index('C',2)
