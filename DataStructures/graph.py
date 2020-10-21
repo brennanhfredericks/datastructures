@@ -86,7 +86,7 @@ class Graph:
         """
         using Breadth First Search
         """
-        assert (from_vertex and to_vertex) in self._graph_dict.keys()
+        #assert (from_vertex and to_vertex) in self._graph_dict.keys()
 
         all_routes = self.all_paths(from_vertex,to_vertex)
         min_len = min(map(len,all_routes))
@@ -97,7 +97,7 @@ class Graph:
         """
         using Breadth First Search
         """
-        assert (from_vertex and to_vertex) in self._graph_dict.keys()
+        #assert (from_vertex and to_vertex) in self._graph_dict.keys()
 
         all_routes = self.all_paths(from_vertex,to_vertex)
         max_len = max(map(len,all_routes))
@@ -137,3 +137,73 @@ class Graph:
                     routes.append(new_path)
 
         return routes
+
+    def all_destinations(self,from_vertex):
+        """
+        path to destination without passing through same node
+        """
+        assert from_vertex in self._graph_dict.keys()
+
+        queue = [[from_vertex]]
+
+        destinations = []
+
+        while queue:
+
+            path = queue.pop(0)
+            node = path[-1]
+
+            neighbors = self.neighbors(node)
+
+            for neighbor in neighbors:
+     
+                new_path = list(path)
+                
+                if neighbor in new_path:
+                    continue
+
+                new_path.append(neighbor)
+                queue.append(new_path)
+
+                destinations.append(new_path)
+
+        return destinations
+
+    def deadend_paths(self,from_vertex):
+        assert from_vertex in self._graph_dict.keys()
+
+        queue = [[from_vertex]]
+
+        deadends = []
+
+        while queue:
+
+            path = queue.pop(0)
+            node = path[-1]
+
+            neighbors = self.neighbors(node)
+
+            for neighbor in neighbors:
+     
+                new_path = list(path)
+                
+                if neighbor in new_path:
+                    if len(neighbors) < 2:
+                        deadends.append(new_path)
+                    
+                    continue
+
+                new_path.append(neighbor)
+                queue.append(new_path)
+
+               
+        return deadends
+
+
+    def scenic_path(self,from_vertex):
+
+        destinations = self.all_destinations(from_vertex)
+
+        max_len = max(map(len,destinations))
+       
+        return list(route for route in destinations if len(route) == max_len)

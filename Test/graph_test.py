@@ -71,9 +71,13 @@ def test_graph1():
     # print(mygraph.neighbors('G'))
 
     #print(mygraph.all_paths('A','I'))
-    print(mygraph.shortest_path('A','O'))
-    print(mygraph.longest_path('A','O'))
-   
+    # print(mygraph.shortest_path('A','O'))
+    # print(mygraph.longest_path('A','O'))
+
+    #print(mygraph.all_destinations('A'))
+
+    #print(mygraph.furthest_path('A'))
+    print(mygraph.deadend_paths('I'))
 #test_graph()
 test_graph1()
 
