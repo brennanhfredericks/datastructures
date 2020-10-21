@@ -78,9 +78,62 @@ class Graph:
 
         return unique_edges
 
-
     def viewGraph(self):
 
         pp.pprint(self._graph_dict)
 
+    def shortest_path(self,from_vertex,to_vertex):
+        """
+        using Breadth First Search
+        """
+        assert (from_vertex and to_vertex) in self._graph_dict.keys()
 
+        all_routes = self.all_paths(from_vertex,to_vertex)
+        min_len = min(map(len,all_routes))
+       
+        return list(route for route in all_routes if len(route) == min_len)
+
+    def longest_path(self,from_vertex,to_vertex):
+        """
+        using Breadth First Search
+        """
+        assert (from_vertex and to_vertex) in self._graph_dict.keys()
+
+        all_routes = self.all_paths(from_vertex,to_vertex)
+        max_len = max(map(len,all_routes))
+       
+        return list(route for route in all_routes if len(route) == max_len)
+
+    def all_paths(self,from_vertex,to_vertex):
+
+        assert (from_vertex and to_vertex) in self._graph_dict.keys()
+
+        queue = [[from_vertex]]
+
+        routes = []
+
+        if from_vertex == to_vertex:
+            print("From and To node are the same")
+            return
+
+        while queue:
+
+            path = queue.pop(0)
+            node = path[-1]
+
+            neighbors = self.neighbors(node)
+
+            for neighbor in neighbors:
+     
+                new_path = list(path)
+                
+                if neighbor in new_path:
+                    continue
+
+                new_path.append(neighbor)
+                queue.append(new_path)
+
+                if neighbor == to_vertex:
+                    routes.append(new_path)
+
+        return routes

@@ -37,6 +37,44 @@ def test_graph():
     mygraph.remove_edge('a','b')
     mygraph.viewGraph()
 
-test_graph()
+def test_graph1():
+    """
+
+    A - B - C - D
+    |       |
+    K - M   E - F 
+    |   |   |
+    L   N - G - J 
+        |   |
+        O - H - I   
+    """
+    elements = {
+        "A": ["B","K"],
+        "B": ["C","A"],
+        "C": ["B","D","E"],
+        "D": ["C"],
+        "E": ["C","F","G"],
+        "F": ["E"],
+        "G": ["E","J","H","N"],
+        "H": ["G","I","O"],
+        "I": ["H"],
+        "J": ["G"],
+        "K": ["A","L","M"],
+        "L": ["K"],
+        "M": ["K","N"],
+        "N": ["M","G","O"],
+        "O": ["N","H"]
+    }
+    mygraph = Graph(elements)
+    # print(mygraph.neighbors('K'))
+    # print(mygraph.neighbors('C'))
+    # print(mygraph.neighbors('G'))
+
+    #print(mygraph.all_paths('A','I'))
+    print(mygraph.shortest_path('A','O'))
+    print(mygraph.longest_path('A','O'))
+   
+#test_graph()
+test_graph1()
 
 
