@@ -199,7 +199,6 @@ class Graph:
                
         return deadends
 
-
     def scenic_path(self,from_vertex):
 
         destinations = self.all_destinations(from_vertex)
