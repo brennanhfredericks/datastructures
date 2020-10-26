@@ -1,5 +1,72 @@
 
-from collections import defaultdict
+import time
+from collections import defaultdict,deque
+from multiprocessing import Process, Queue,current_process,freeze_support
+
+from heap import MinHeap # type: ignore
+
+#Priority Queue
+class MinHeap:
+    #[[path,cost]]
+    def __init__(self):
+        self._heap =[[None,None]]
+
+    def peek(self):
+        if len(self._heap) > 2:
+            return self._heap[1]
+        else:
+            return False
+
+    def push(self,data):
+        self._heap.append(data)
+        self._shift_up(len(self._heap)-1)
+
+    def pop(self):
+        ret = None
+
+        if len(self._heap) > 2:
+            self._swap(1,len(self._heap)-1)
+            ret = self._heap.pop()
+            self._shift_down(1)
+
+        elif len(self._heap) == 2:
+            ret = self._heap.pop()
+
+        return ret
+
+    def size(self):
+        return len(self._heap)-1
+
+    def _swap(self,i,j):
+        self._heap[i],self._heap[j] = self._heap[j],self._heap[i]
+
+    def _shift_up(self,index):
+        parent = index//2
+
+        if index <=1:
+            return
+        elif self._heap[parent][-1] > self._heap[index][-1]: # check on cost parameter [[]]
+            self._swap(parent,index)
+            self._shift_up(parent)
+
+    def _shift_down(self,index):
+
+        left_child = 2*index
+        right_child = 2*index + 1
+
+        lowest_key = index
+
+        
+        if len(self._heap) > left_child and self._heap[lowest_key][-1] > self._heap[left_child][-1]:# check on cost parameter [[]]
+            lowest_key = left_child
+
+        if len(self._heap) > right_child and self._heap[lowest_key][-1] > self._heap[right_child][-1]:# check on cost parameter [[]]
+            lowest_key = right_child
+
+        if index != lowest_key:
+            self._swap(index,lowest_key)
+            self._shift_down(lowest_key)  
+
 
 
 class Undirected_Graph:
@@ -84,18 +151,21 @@ class Undirected_Graph:
         
         assert (from_vertex and to_vertex) in self._graph_dict.keys()
 
-        queue = [[[from_vertex],0]]
+       # queue = []
+        min_queue = MinHeap()
 
-        
+        min_queue.push([[from_vertex],0])
+
         routes = []
 
         if from_vertex == to_vertex:
             print("From and To node are the same")
             return
 
-        while queue:
+        # print(min_queue.size())
+        while min_queue.size() > 0:
             #print(len(queue))
-            path,total_cost = queue.pop(0)
+            path,total_cost = min_queue.pop()
             node = path[-1]
 
             neighbors = self.getNeighbors(node)
@@ -108,7 +178,7 @@ class Undirected_Graph:
                     continue
 
                 new_path.append(neighbor)
-                queue.append([new_path,new_cost])
+                min_queue.push([new_path,new_cost])
 
                 if neighbor == to_vertex:
                     routes.append([new_path,new_cost])
@@ -130,6 +200,7 @@ class Undirected_Graph:
         assert (from_vertex and to_vertex) in self._graph_dict.keys()
 
         queue = [[[from_vertex],0]]
+
         need_to_visit = set(self.getVertices())
         routes = []
 
@@ -166,5 +237,54 @@ class Undirected_Graph:
                 #print(routes)
                 break
 
+    @staticmethod
+    def worker(graph_instance,to_vertex,need_visit,task_q,route_q):
+        #[[path],cost]
+        for path,total_cost in (task_q.get,"STOP"):
+            
+            visited = set(path)
+            node = path[-1]
+
+            neighbors = graph_instance.getNeighbors(node)
+
+            diff = need_visit.symmetric_difference(visited)
+
+            for neighbor,cost in neighbors:
+                    
+                new_path = list(path)
+                new_cost = total_cost + cost
+                # if needed check for repeat condition
+
+                if neighbor in new_path:
+                    continue
+
+                new_path.append(neighbor)
+                task_q.put([new_path,cost])
+
+                if neighbor == to_vertex:
+                    route_q.put([new_path,new_cost]) 
+
+            if len(diff) < 13:
+                task_q.put("STOP")
+            
+
+    def multiworker_search(self,from_vertex,to_vertex):
         
+        assert (from_vertex and to_vertex) in self._graph_dict.keys()
+
+        task_queue = Queue()
+        route_queue = Queue()
+        need_to_visit = self.getVertices()
+
+        task_queue.put([[[from_vertex],0]])
+        NUMBER_OF_PROCESSES = 1
+
+        for i in range(NUMBER_OF_PROCESSES):
+            Process(target=self.worker,args=(self,to_vertex,need_to_visit,task_queue,route_queue)).start()
+
+        print(task_queue.qsize())
+
+
+
+
 
