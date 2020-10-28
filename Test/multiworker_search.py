@@ -7,7 +7,7 @@ from tqdm import tqdm, trange
 
 
 import json
-from collections import deque
+from collections import defaultdict
 from multiprocessing import Process,Queue,current_process, freeze_support,Value
 
 sys.path.insert(0,'e:\\python\\data_structures_algorithms\\DataStructures')
@@ -16,7 +16,7 @@ from undirected_graph import Undirected_Graph #type: ignore
 
 def create_random_graph(vertexs,max_edges=6):
     
-    random_ = random.Random(1337)
+    random_ = random.Random(2020)
 
     graph = {}
 
@@ -106,21 +106,22 @@ def worker_iter_v2(graph,to_vertex,task_q,valid_routes_q,b_path):
        
     # print(f"{current_process().name}: stopped")
 
-def multiworker_path_finder_iter_v2(graph,from_vertex,to_vertex,best_path,number_of_processes=4):
+def multiworker_path_finder_iter_v2(graph,from_vertex,to_vertex,best_path_cost,number_of_processes=4,output_valid_paths=False):
     assert (from_vertex and to_vertex) in graph.keys()
 
     NUMBER_OF_PROCESSES = number_of_processes
 
     task_queue = Queue()
     valid_route_queue = Queue()
-    best_path_so_far = Value('i',int(best_path))
+    best_path_cost_so_far = Value('i',int(best_path_cost))
+    best_path = defaultdict(list)
 
     timestamp = int(time.time())
 
     task_queue.put([[from_vertex],0])
 
     for i in range(NUMBER_OF_PROCESSES):
-        Process(target=worker_iter_v2,args=(graph,to_vertex,task_queue,valid_route_queue,best_path_so_far),daemon=True).start()
+        Process(target=worker_iter_v2,args=(graph,to_vertex,task_queue,valid_route_queue,best_path_cost_so_far),daemon=True).start()
 
     time.sleep(1)
    
@@ -129,35 +130,44 @@ def multiworker_path_finder_iter_v2(graph,from_vertex,to_vertex,best_path,number
         if task_queue.empty() and valid_route_queue.empty():
             wait_threads = False
         elif not valid_route_queue.empty():
-            with open(f"Search\\valid_paths_from_{from_vertex}_to_{to_vertex}_{timestamp}.txt",'a') as fp:
-                    while not valid_route_queue.empty():
-                        v_route,cost = valid_route_queue.get()
-                        fp.write("%s\n" % json.dumps(dict(path=v_route,cost=cost)))
+            
+            while not valid_route_queue.empty():
+                v_route,cost = valid_route_queue.get()
+                best_path[cost].append(v_route)
         else:
-            # print("taske queue: ",task_queue.qsize(),valid_route_queue.qsize())
             time.sleep(1)
 
-    # print(f"task queue empty {task_queue.qsize()} , stopping threads")
     assert task_queue.qsize() == 0 , "search did not complete"
     assert valid_route_queue.qsize() ==0, "valid routes remaining"
 
     for i in range(NUMBER_OF_PROCESSES):
         task_queue.put('STOP')
 
+    if output_valid_paths and len(best_path.keys()) > 0:
+        with open(f"Search\\valid_paths_from_{from_vertex}_to_{to_vertex}_{timestamp}.txt",'a') as fp:
+            for cost,paths in best_path.items():
+                for path in paths:
+                    fp.write("%s\n" % json.dumps(dict(path=path,cost=cost)))
+
     #print("threads stopping")
 
     task_queue.close()
     valid_route_queue.close()
-    #print(best_path_so_far.value)
-    return  int(best_path_so_far.value)
+    
+    if len(best_path.keys()) > 0:
+        bpc = min(best_path.keys())
+        return  bpc,best_path[bpc]
+    else:
+        return int(best_path_cost_so_far.value),None
     
 def best_path_visit_all_nodes_once():
     graph = random_graph()
     
     l = len(graph)
-    best_path = 99999
 
+    valid_best_paths = defaultdict(list)
 
+    best_path_cost = 99999
 
     with tqdm(total=l*l) as pbar:
         for from_vertex in graph.keys():
@@ -166,11 +176,20 @@ def best_path_visit_all_nodes_once():
                 pbar.update()
                 if from_vertex == to_vertex:
                     continue
-                best_path = multiworker_path_finder_iter_v2(graph,from_vertex,to_vertex,best_path,number_of_processes=6)
-            
+                best_path_cost,best_paths = multiworker_path_finder_iter_v2(graph,from_vertex,to_vertex,best_path_cost,number_of_processes=6,output_valid_paths=True)
                 
+                if best_paths is not None:
+                    for path in best_paths:
+                        valid_best_paths[best_path_cost].append(path)
+
+    if len(valid_best_paths.keys()) == 0:
+        return None
+    else:
+        bpc = min(valid_best_paths.keys())
+        return bpc,valid_best_paths[bpc]
+    
             
 if __name__ == "__main__":
     freeze_support()
 
-    best_path_visit_all_nodes_once()
+    print(best_path_visit_all_nodes_once())
