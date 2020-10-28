@@ -10,14 +10,11 @@ import json
 from collections import deque
 from multiprocessing import Process,Queue,current_process, freeze_support,Value
 
-
-
-
 sys.path.insert(0,'e:\\python\\data_structures_algorithms\\DataStructures')
 from undirected_graph import Undirected_Graph #type: ignore
 
 
-def create_random_graph(vertexs,max_edges=2):
+def create_random_graph(vertexs,max_edges=6):
     
     random_ = random.Random(1337)
 
@@ -44,7 +41,7 @@ def create_random_graph(vertexs,max_edges=2):
 
 def random_graph():
     graph = Undirected_Graph()
-    [graph.addVertice(chr(i)) for i in range(ord('A'),ord('Z')+1)]
+    [graph.addVertice(chr(i)) for i in range(ord('A'),ord('K')+1)]
 
     
     graph_d = create_random_graph(graph.getVertices())
@@ -147,35 +144,32 @@ def multiworker_path_finder_iter_v2(graph,from_vertex,to_vertex,best_path,number
     for i in range(NUMBER_OF_PROCESSES):
         task_queue.put('STOP')
 
-    print("threads stopping")
+    #print("threads stopping")
 
     task_queue.close()
     valid_route_queue.close()
     #print(best_path_so_far.value)
     return  int(best_path_so_far.value)
     
-
-
-
 def best_path_visit_all_nodes_once():
     graph = random_graph()
     
     l = len(graph)
-    best_path = 5000
+    best_path = 99999
 
-    test_vertex = ['B','Z','K','C']
 
-    with tqdm(total=l*len(test_vertex)) as pbar:
+
+    with tqdm(total=l*l) as pbar:
         for from_vertex in graph.keys():
-            for to_vertex in test_vertex:
-                # print(from_vertex,to_vertex)
+            for to_vertex in graph.keys():
+                
                 pbar.update()
                 if from_vertex == to_vertex:
                     continue
                 best_path = multiworker_path_finder_iter_v2(graph,from_vertex,to_vertex,best_path,number_of_processes=6)
+            
                 
-        
-            break
+            
 if __name__ == "__main__":
     freeze_support()
 
