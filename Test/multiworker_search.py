@@ -13,8 +13,7 @@ from multiprocessing import Process,Queue,current_process, freeze_support,Value
 sys.path.insert(0,'e:\\python\\data_structures_algorithms\\DataStructures')
 from undirected_graph import Undirected_Graph #type: ignore
 
-
-def create_random_graph(vertexs,max_edges=6):
+def create_random_edges(vertexs,max_edges=6):
     
     random_ = random.Random(2020)
 
@@ -44,7 +43,7 @@ def random_graph():
     [graph.addVertice(chr(i)) for i in range(ord('A'),ord('K')+1)]
 
     
-    graph_d = create_random_graph(graph.getVertices())
+    graph_d = create_random_edges(graph.getVertices())
 
     for from_vertex,v in graph_d.items():
         if len(v) > 0:
